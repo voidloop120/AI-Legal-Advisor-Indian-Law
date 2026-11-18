@@ -10,15 +10,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.config import APP_TITLE, APP_VERSION, FRONTEND_DIR, LEGAL_DISCLAIMER
+from backend.database import init_db
+from backend.routes.cases import router as cases_router
 
-# 1. Initialize FastAPI application
+# 1. Initialize Database on startup
+init_db()
+
+# 2. Initialize FastAPI application
 app = FastAPI(
     title=APP_TITLE,
     version=APP_VERSION,
     description="FastAPI backend for AI Legal Advisor (Indian Law)",
 )
 
-# 2. Add CORS middleware (allows frontend to communicate with backend smoothly)
+# 3. Add CORS middleware (allows frontend to communicate with backend smoothly)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,8 +32,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 4. Register API routers
+app.include_router(cases_router)
 
-# 3. Basic API endpoints
+
+# 5. Basic API endpoints
 @app.get("/api/health")
 def health_check():
     """

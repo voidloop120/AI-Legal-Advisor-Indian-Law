@@ -25,7 +25,7 @@
 
       <nav class="sidebar-nav">
         <a class="nav-item active" href="#"><span>⌂</span> Dashboard</a>
-        <a class="nav-item" href="#"><span>＋</span> Start New Case</a>
+        <a class="nav-item" id="navStartNewCase" href="#"><span>＋</span> Start New Case</a>
         <a class="nav-item" href="#"><span>⌕</span> FIR Analyzer</a>
         <a class="nav-item" href="#"><span>▣</span> Law & Section Explorer</a>
         <a class="nav-item" href="#"><span>⌘</span> Case Journey</a>
@@ -87,7 +87,7 @@
 
         <!-- Main feature cards -->
         <section class="feature-grid">
-          <article class="feature-card blue">
+          <article class="feature-card blue" id="cardStartNewCase">
             <div class="feature-icon">📄＋</div>
             <div>
               <h3>Start New Case</h3>
@@ -128,99 +128,31 @@
         <section class="dashboard-grid">
 
           <!-- Cases -->
-          <div class="panel">
+          <div class="panel" id="casesPanel">
             <div class="panel-header">
               <h2>My Cases</h2>
-              <a href="#">View All →</a>
+              <button id="refreshCasesBtn" style="background:none; border:none; color:var(--blue); font-weight:600; cursor:pointer;">↻ Refresh</button>
             </div>
 
-            <div class="case-card">
-              <div class="case-top">
-                <span class="doc-icon">▤</span>
-                <div>
-                  <h3>Case #2026-001</h3>
-                  <p>FIR No. 123/2026 | Police Station: XYZ</p>
-                  <small>Current Stage: <strong>Investigation</strong></small>
-                </div>
-                <span class="status active-status">Active</span>
-              </div>
-              <div class="progress-row">
-                <div class="progress"><span style="width:46%"></span></div>
-                <b>46%</b>
-              </div>
-            </div>
-
-            <div class="case-card">
-              <div class="case-top">
-                <span class="doc-icon">▤</span>
-                <div>
-                  <h3>Case #2025-088</h3>
-                  <p>Civil Suit | Property Dispute</p>
-                  <small>Current Stage: <strong>Hearing</strong></small>
-                </div>
-                <span class="status progress-status">In Progress</span>
-              </div>
-              <div class="progress-row">
-                <div class="progress"><span class="green-progress" style="width:70%"></span></div>
-                <b>70%</b>
-              </div>
-            </div>
-
-            <div class="case-card">
-              <div class="case-top">
-                <span class="doc-icon">▤</span>
-                <div>
-                  <h3>Case #2024-056</h3>
-                  <p>Consumer Complaint</p>
-                  <small>Current Stage: <strong>Order Pending</strong></small>
-                </div>
-                <span class="status closed-status">Closed</span>
-              </div>
-              <div class="progress-row">
-                <div class="progress"><span class="purple-progress" style="width:90%"></span></div>
-                <b>90%</b>
-              </div>
+            <div id="casesListContainer">
+              <p style="padding: 16px; color: var(--muted); text-align: center;">Loading cases from database...</p>
             </div>
           </div>
 
           <!-- Journey -->
-          <div class="panel journey-panel">
+          <div class="panel journey-panel" id="journeyPanel">
             <div class="panel-header">
               <h2>Case Journey</h2>
-              <span class="muted">Example</span>
+              <span class="muted" id="journeyCaseNumber">Select a case</span>
             </div>
 
-            <div class="timeline">
-              <div class="timeline-item done">
-                <span class="dot">✓</span>
-                <div><strong>FIR Registered</strong><small>10 Jan 2026</small></div>
-              </div>
-              <div class="timeline-item current">
-                <span class="dot"></span>
-                <div><strong>Investigation</strong><small>In Progress</small></div>
-              </div>
-              <div class="timeline-item">
-                <span class="dot"></span>
-                <div><strong>Charge Sheet</strong></div>
-              </div>
-              <div class="timeline-item">
-                <span class="dot"></span>
-                <div><strong>Court Proceedings</strong></div>
-              </div>
-              <div class="timeline-item">
-                <span class="dot"></span>
-                <div><strong>Hearing</strong></div>
-              </div>
-              <div class="timeline-item">
-                <span class="dot"></span>
-                <div><strong>Final Order</strong></div>
-              </div>
+            <div class="timeline" id="journeyTimeline">
+              <!-- Dynamically populated from /api/cases/{id} -->
             </div>
 
-            <div class="journey-info">
-              <strong>📍 You are here: Investigation</strong>
-              <p>The police are collecting evidence and recording statements.</p>
-              <button>Know More →</button>
+            <div class="journey-info" id="journeyInfo">
+              <strong>📍 Select a case to view its current legal stage</strong>
+              <p>Understanding where your case stands helps you prepare the next legal step.</p>
             </div>
           </div>
 
@@ -291,6 +223,44 @@
 
       </div>
     </main>
+  </div>
+
+  <!-- Start New Case Modal -->
+  <div id="newCaseModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📄 Start New Case</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <form id="newCaseForm">
+        <div class="form-group">
+          <label for="caseTitle">Case Title / FIR Details *</label>
+          <input type="text" id="caseTitle" placeholder="e.g. FIR No. 102/2026 - Cyber Fraud" required>
+        </div>
+        <div class="form-group">
+          <label for="caseType">Case Type / Act *</label>
+          <select id="caseType">
+            <option value="Criminal - FIR">Criminal - FIR (BNS / BNSS)</option>
+            <option value="Consumer Complaint">Consumer Complaint (Consumer Protection Act)</option>
+            <option value="Civil Suit">Civil Dispute (Property / Contract)</option>
+            <option value="Negotiable Instruments">Cheque Bounce (NI Act)</option>
+            <option value="Other">Other Legal Matter</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="policeStation">Police Station / Court / Forum</label>
+          <input type="text" id="policeStation" placeholder="e.g. Cyber Crime Police Station, Whitefield">
+        </div>
+        <div class="form-group">
+          <label for="caseDesc">Brief Summary of the Matter</label>
+          <textarea id="caseDesc" rows="3" placeholder="Provide a short description of the dispute or FIR allegations..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary" id="saveCaseSubmitBtn">Create Case</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="script.js"></script>

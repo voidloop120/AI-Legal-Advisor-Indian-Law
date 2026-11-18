@@ -78,7 +78,7 @@ uvicorn backend.main:app --reload
 ## 🎯 Current Implementation Status
 
 - [x] **Phase 1: Foundation & Setup** — Directory structure, Git, FastAPI server, Static frontend serving, Health & Disclaimer APIs.
-- [ ] **Phase 2: Database & Case Management** — SQLite database, case tracking, case journey stages.
+- [x] **Phase 2: Database & Case Management** — SQLite database, case tracking, case journey stages, dynamic UI integration.
 - [ ] **Phase 3: Legal Knowledge Base & RAG** — BNS/BNSS/BSA law indexing with ChromaDB.
 - [ ] **Phase 4: AI Legal Assistant** — RAG-powered chatbot with strict Act + Section citations.
 - [ ] **Phase 5: FIR Analyzer** — Upload FIR, extract offenses, map relevant sections.

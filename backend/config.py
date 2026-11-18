@@ -11,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 DATA_DIR = BASE_DIR / "data"
 LEGAL_DOCS_DIR = DATA_DIR / "legal_docs"
+DATABASE_PATH = DATA_DIR / "legal_advisor.db"
 
 # Application Metadata
 APP_TITLE = "AI Legal Advisor for Indian Law"
