@@ -27,13 +27,31 @@ AI_Legal_Advisor/
 │   ├── __init__.py           # Package marker
 │   ├── main.py               # FastAPI application entry point & static server
 │   ├── config.py             # App settings, paths, and legal disclaimer
-│   └── requirements.txt      # Python dependencies
+│   ├── database.py           # SQLite database connection & schema
+│   ├── requirements.txt      # Python dependencies
+│   ├── rag/                  # RAG (Retrieval-Augmented Generation) package
+│   │   ├── __init__.py
+│   │   ├── vector_store.py   # ChromaDB vector store & semantic search
+│   │   └── indexer.py        # CLI script to index laws & test queries
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── cases.py          # Case management & journey APIs
+│   │   └── laws.py           # Law & Section Explorer APIs (BNS, BNSS, BSA, CPA)
+│   └── tests/
+│       ├── __init__.py
+│       ├── test_cases.py     # Tests for case management
+│       ├── test_laws.py      # Tests for laws explorer
+│       ├── test_main.py      # Tests for core server
+│       └── test_rag.py       # Tests for RAG vector retrieval
 ├── frontend/
-│   ├── index.html            # Main web UI dashboard
-│   ├── style.css             # Dark-themed styling
-│   └── script.js             # Client-side interactions
+│   ├── index.html            # Main web UI dashboard & modals
+│   ├── style.css             # Dark-themed responsive styling
+│   └── script.js             # Client-side interactions & API bindings
 ├── data/
-│   └── legal_docs/           # Legal texts (BNS, BNSS, BSA, Consumer Protection Act)
+│   ├── legal_advisor.db      # SQLite database
+│   ├── chroma_db/            # ChromaDB persistent vector database
+│   └── legal_docs/           # Statutory provisions (BNS, BNSS, BSA, CPA)
+│       └── indian_laws.json
 ├── .gitignore                # Files excluded from git
 └── README.md                 # Project documentation and guide
 ```
@@ -68,10 +86,21 @@ pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-### 5. Open in Your Browser
+### 5. Test the Legal RAG Indexer (CLI)
+```powershell
+python -m backend.rag.indexer
+```
+
+### 6. Run Automated Unit Tests
+```powershell
+pytest backend/tests/test_laws.py backend/tests/test_rag.py -v
+```
+
+### 7. Open in Your Browser
 - Web Interface: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 - Interactive API Docs (Swagger): [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - Health Check: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+- Law Explorer API: [http://127.0.0.1:8000/api/laws](http://127.0.0.1:8000/api/laws)
 
 ---
 
@@ -79,7 +108,7 @@ uvicorn backend.main:app --reload
 
 - [x] **Phase 1: Foundation & Setup** — Directory structure, Git, FastAPI server, Static frontend serving, Health & Disclaimer APIs.
 - [x] **Phase 2: Database & Case Management** — SQLite database, case tracking, case journey stages, dynamic UI integration.
-- [ ] **Phase 3: Legal Knowledge Base & RAG** — BNS/BNSS/BSA law indexing with ChromaDB.
+- [x] **Phase 3: Legal Knowledge Base & RAG** — BNS/BNSS/BSA/CPA statutory explorer, ChromaDB vector store, semantic search indexer, and unit test suite.
 - [ ] **Phase 4: AI Legal Assistant** — RAG-powered chatbot with strict Act + Section citations.
 - [ ] **Phase 5: FIR Analyzer** — Upload FIR, extract offenses, map relevant sections.
 - [ ] **Phase 6: Auth & Final Polish** — Simple authentication, advocate preparation sheet.

@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.config import APP_TITLE, APP_VERSION, FRONTEND_DIR, LEGAL_DISCLAIMER
 from backend.database import init_db
 from backend.routes.cases import router as cases_router
+from backend.routes.laws import router as laws_router
 
 # 1. Initialize Database on startup
 init_db()
@@ -34,6 +35,7 @@ app.add_middleware(
 
 # 4. Register API routers
 app.include_router(cases_router)
+app.include_router(laws_router)
 
 
 # 5. Basic API endpoints

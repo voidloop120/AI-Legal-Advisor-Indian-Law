@@ -11,6 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 DATA_DIR = BASE_DIR / "data"
 LEGAL_DOCS_DIR = DATA_DIR / "legal_docs"
+INDIAN_LAWS_PATH = LEGAL_DOCS_DIR / "indian_laws.json"
+CHROMA_DB_DIR = DATA_DIR / "chroma_db"
 DATABASE_PATH = DATA_DIR / "legal_advisor.db"
 
 # Application Metadata

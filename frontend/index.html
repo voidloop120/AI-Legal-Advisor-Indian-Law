@@ -27,7 +27,7 @@
         <a class="nav-item active" href="#"><span>⌂</span> Dashboard</a>
         <a class="nav-item" id="navStartNewCase" href="#"><span>＋</span> Start New Case</a>
         <a class="nav-item" href="#"><span>⌕</span> FIR Analyzer</a>
-        <a class="nav-item" href="#"><span>▣</span> Law & Section Explorer</a>
+        <a class="nav-item" id="navLawExplorer" href="#"><span>▣</span> Law & Section Explorer</a>
         <a class="nav-item" href="#"><span>⌘</span> Case Journey</a>
         <a class="nav-item" href="#"><span>▤</span> Find Legal Documents</a>
         <a class="nav-item" href="#"><span>▱</span> My Cases</a>
@@ -114,7 +114,7 @@
             <span class="arrow">→</span>
           </article>
 
-          <article class="feature-card green">
+          <article class="feature-card green" id="cardLawExplorer">
             <div class="feature-icon">📖</div>
             <div>
               <h3>Law & Section Explorer</h3>
@@ -260,6 +260,52 @@
           <button type="submit" class="btn-primary" id="saveCaseSubmitBtn">Create Case</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Law & Section Explorer Modal -->
+  <div id="lawExplorerModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div>
+          <h3>⚖️ Indian Law & Section Explorer</h3>
+          <p class="modal-subtitle">Provisions under BNS, BNSS, BSA, and Consumer Protection Act (CPA)</p>
+        </div>
+        <button id="closeLawModalBtn" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Search & Act Filter Tabs -->
+      <div class="law-controls">
+        <div class="law-search-box">
+          <span>⌕</span>
+          <input type="text" id="lawSearchInput" placeholder="Search section, offense, or topic (e.g. theft, bail, 303, cheating, evidence)...">
+        </div>
+        <div class="act-tabs" id="actTabsContainer">
+          <button class="act-tab active" data-act="">All Acts (18)</button>
+          <button class="act-tab" data-act="BNS">BNS (Criminal)</button>
+          <button class="act-tab" data-act="BNSS">BNSS (Procedure)</button>
+          <button class="act-tab" data-act="BSA">BSA (Evidence)</button>
+          <button class="act-tab" data-act="CPA">CPA (Consumer)</button>
+        </div>
+      </div>
+
+      <!-- Results Count & List Container -->
+      <div class="law-results-header">
+        <span id="lawResultsCount">Loading legal provisions...</span>
+      </div>
+      <div id="lawListContainer" class="law-list-container">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+
+      <!-- Mandatory Legal Disclaimer in Modal -->
+      <div class="law-disclaimer-box">
+        <strong>⚠️ Mandatory Disclaimer:</strong>
+        <span>This explorer provides statutory information for educational awareness only, not formal legal advice. It does not create an advocate-client relationship.</span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeLawModalFooterBtn" class="btn-secondary">Close</button>
+      </div>
     </div>
   </div>
 
