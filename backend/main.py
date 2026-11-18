@@ -1,0 +1,64 @@
+"""
+AI Legal Advisor - FastAPI Main Application
+--------------------------------------------
+This is the entry point for the backend server.
+It sets up API routes and serves the frontend web interface.
+"""
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from backend.config import APP_TITLE, APP_VERSION, FRONTEND_DIR, LEGAL_DISCLAIMER
+
+# 1. Initialize FastAPI application
+app = FastAPI(
+    title=APP_TITLE,
+    version=APP_VERSION,
+    description="FastAPI backend for AI Legal Advisor (Indian Law)",
+)
+
+# 2. Add CORS middleware (allows frontend to communicate with backend smoothly)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# 3. Basic API endpoints
+@app.get("/api/health")
+def health_check():
+    """
+    Health check endpoint to verify backend server is running.
+    Also returns the mandatory legal disclaimer.
+    """
+    return {
+        "status": "healthy",
+        "app": APP_TITLE,
+        "version": APP_VERSION,
+        "disclaimer": LEGAL_DISCLAIMER,
+    }
+
+
+@app.get("/api/disclaimer")
+def get_disclaimer():
+    """
+    Returns the legal information disclaimer.
+    Rule: AI Legal Advisor provides legal information, not legal advice.
+    """
+    return {
+        "disclaimer": LEGAL_DISCLAIMER
+    }
+
+
+# 4. Serve the Frontend
+# Mount the frontend directory so that index.html, style.css, and script.js
+# are automatically accessible at http://127.0.0.1:8000/
+app.mount(
+    "/",
+    StaticFiles(directory=str(FRONTEND_DIR), html=True),
+    name="frontend",
+)
