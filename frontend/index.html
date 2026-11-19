@@ -26,12 +26,12 @@
       <nav class="sidebar-nav">
         <a class="nav-item active" href="#"><span>⌂</span> Dashboard</a>
         <a class="nav-item" id="navStartNewCase" href="#"><span>＋</span> Start New Case</a>
-        <a class="nav-item" href="#"><span>⌕</span> FIR Analyzer</a>
+        <a class="nav-item" id="navFirAnalyzer" href="#"><span>⌕</span> FIR Analyzer</a>
         <a class="nav-item" id="navLawExplorer" href="#"><span>▣</span> Law & Section Explorer</a>
         <a class="nav-item" href="#"><span>⌘</span> Case Journey</a>
         <a class="nav-item" href="#"><span>▤</span> Find Legal Documents</a>
         <a class="nav-item" href="#"><span>▱</span> My Cases</a>
-        <a class="nav-item" href="#"><span>🤖</span> AI Case Assistant</a>
+        <a class="nav-item" id="navAiAssistant" href="#"><span>🤖</span> AI Case Assistant</a>
         <a class="nav-item" href="#"><span>♟</span> Advocate Preparation</a>
         <a class="nav-item" href="#"><span>🔗</span> Court & Police Links</a>
         <a class="nav-item" href="#"><span>▦</span> Legal Resources</a>
@@ -55,11 +55,11 @@
           <span>⌕</span>
           <input id="searchInput" type="text" placeholder="Search for a section, Act, case type, or ask your legal question...">
         </div>
-        <div class="profile-area">
-          <button class="notification">🔔<b>3</b></button>
-          <div class="avatar">A</div>
-          <strong>Hello, Ankit</strong>
-          <span>⌄</span>
+        <div class="profile-area" id="profileAreaBtn" style="cursor: pointer;" title="Manage Account / Switch User">
+          <button class="notification" id="notificationBtn" title="3 Notifications">🔔<b>3</b></button>
+          <div class="avatar" id="userAvatar">A</div>
+          <strong id="userDisplayName">Hello, Ankit</strong>
+          <span id="authActionLabel" style="font-size: 11px; background: #f1f5f9; padding: 2px 7px; border-radius: 4px; border: 1px solid #cbd5e1; color: #475569;">Sign In</span>
         </div>
       </header>
 
@@ -96,7 +96,7 @@
             <span class="arrow">→</span>
           </article>
 
-          <article class="feature-card pink">
+          <article class="feature-card pink" id="cardFirAnalyzer">
             <div class="feature-icon">👮</div>
             <div>
               <h3>FIR Analyzer</h3>
@@ -198,7 +198,7 @@
             <h2>Popular Tools</h2>
           </div>
           <div class="tool-grid">
-            <article class="tool-card purple">
+            <article class="tool-card purple" id="cardAiAssistant">
               <span>💬</span><div><h3>AI Case Assistant</h3><p>Ask about your case</p></div><b>→</b>
             </article>
             <article class="tool-card green-tool">
@@ -305,6 +305,241 @@
 
       <div class="modal-footer">
         <button type="button" id="closeLawModalFooterBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Legal Assistant Modal -->
+  <div id="aiAssistantModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div>
+          <h3>🤖 AI Legal Assistant (Indian Law Q&A)</h3>
+          <p class="modal-subtitle">Grounded in BNS, BNSS, BSA, and CPA &bull; Cites Act + Section &bull; Zero Hallucination</p>
+        </div>
+        <button id="closeAssistantModalBtn" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Quick Prompt Suggestions & Act Filter -->
+      <div class="assistant-toolbar">
+        <div class="assistant-filter">
+          <label for="assistantActFilter">Focus Act:</label>
+          <select id="assistantActFilter">
+            <option value="">All Acts (BNS, BNSS, BSA, CPA)</option>
+            <option value="BNS">BNS (Bharatiya Nyaya Sanhita - Offenses)</option>
+            <option value="BNSS">BNSS (Suraksha Sanhita - Procedure & Bail)</option>
+            <option value="BSA">BSA (Sakshya Adhiniyam - Evidence)</option>
+            <option value="CPA">CPA (Consumer Protection Act)</option>
+          </select>
+        </div>
+
+        <div class="quick-prompts">
+          <span class="quick-prompt-chip" data-prompt="What is the punishment for theft under BNS?">Theft Punishment</span>
+          <span class="quick-prompt-chip" data-prompt="When can police arrest without a warrant?">Arrest without Warrant</span>
+          <span class="quick-prompt-chip" data-prompt="How do I file a consumer complaint for defective goods?">Consumer Complaint</span>
+          <span class="quick-prompt-chip" data-prompt="How is electronic evidence proved under BSA?">Electronic Evidence</span>
+        </div>
+      </div>
+
+      <!-- Chat History Area -->
+      <div id="chatMessagesContainer" class="chat-messages-container">
+        <!-- Initial assistant greeting -->
+        <div class="chat-msg assistant-msg">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-body">
+            <div class="msg-header">AI Legal Advisor <span class="badge-neutral">Verified Grounding</span></div>
+            <div class="msg-content">
+              <p><strong>Namaste! I am your AI Legal Assistant.</strong></p>
+              <p>You can ask me questions about criminal offenses, bail, police procedure, evidence admissibility, or consumer disputes in India.</p>
+              <p class="disclaimer-note"><em>All responses are grounded in statutory law and strictly cite Act + Section. If no matching law is found, I will never invent provisions.</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <form id="assistantForm" class="assistant-input-area">
+        <div class="input-row">
+          <input type="text" id="assistantQuestionInput" placeholder="Ask your legal question (e.g. 'Can police arrest without warrant?', 'Punishment for cheating')..." autocomplete="off" required>
+          <button type="submit" id="sendAssistantBtn" class="btn-primary">
+            <span>Ask AI</span> ➔
+          </button>
+        </div>
+      </form>
+
+      <!-- Mandatory Legal Disclaimer -->
+      <div class="law-disclaimer-box">
+        <strong>⚠️ Mandatory Disclaimer:</strong>
+        <span>This AI Legal Assistant provides statutory information for educational and preliminary reference only, not formal legal advice. It does not create an advocate-client relationship. Always consult a licensed advocate for legal proceedings.</span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeAssistantFooterBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIR Analyzer Modal -->
+  <div id="firAnalyzerModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div>
+          <h3>👮 FIR Analyzer & Offense Classifier</h3>
+          <p class="modal-subtitle">Extracts allegations, maps BNS sections, and classifies bail & arrest powers under BNSS</p>
+        </div>
+        <button id="closeFirModalBtn" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Quick sample FIR selectors -->
+      <div class="assistant-toolbar">
+        <div class="assistant-filter">
+          <span>⚡ Try Sample Scenarios:</span>
+        </div>
+        <div class="quick-prompts">
+          <span class="quick-prompt-chip" id="loadSampleCyberBtn">Cyber Fraud & Cheating (BNS § 318)</span>
+          <span class="quick-prompt-chip" id="loadSampleTheftBtn">Bike Theft (BNS § 303)</span>
+          <span class="quick-prompt-chip" id="loadSampleAssaultBtn">Assault & Hurt (BNS § 115, 351)</span>
+        </div>
+      </div>
+
+      <!-- Main FIR Two-Column Workspace -->
+      <div class="fir-workspace-grid">
+
+        <!-- Left Column: Input and File Upload -->
+        <div class="fir-input-column">
+          <label for="firTextInput" style="font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 6px; display: block;">
+            Paste FIR Narrative / Police Complaint Text:
+          </label>
+          <textarea id="firTextInput" rows="8" placeholder="Paste the FIR complaint text here (e.g. details of theft, fraud, loss amount, date, police station)..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.5; outline: none; resize: vertical; box-sizing: border-box;"></textarea>
+
+          <!-- File Upload Option -->
+          <div class="fir-file-upload-box" style="margin-top: 10px; padding: 12px; border: 1px dashed #94a3b8; border-radius: 8px; background: #f8fafc; text-align: center;">
+            <span style="font-size: 18px;">📄</span>
+            <p style="margin: 4px 0; font-size: 12px; color: #475569;">Or upload a plain text (<strong>.txt</strong>) FIR document:</p>
+            <input type="file" id="firFileInput" accept=".txt" style="font-size: 12px; margin-top: 4px;">
+            <div id="firFileStatus" style="font-size: 11px; color: #0284c7; margin-top: 4px;"></div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <button id="analyzeFirSubmitBtn" class="btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700;">
+              <span>Analyze FIR & Classify Charges</span> ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Structured Legal Findings Report -->
+        <div class="fir-report-column" id="firReportColumn" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; min-height: 350px;">
+          <div id="firReportPlaceholder" style="padding: 40px 16px; text-align: center; color: #94a3b8;">
+            <span style="font-size: 32px; display: block; margin-bottom: 8px;">⚖️</span>
+            <p><strong>No FIR Loaded Yet</strong></p>
+            <p style="font-size: 12px;">Paste text on the left, load a sample scenario, or upload a .txt file to view the statutory breakdown.</p>
+          </div>
+
+          <div id="firReportContent" style="display: none;">
+            <!-- Populated dynamically by script.js -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mandatory Legal Disclaimer -->
+      <div class="law-disclaimer-box">
+        <strong>⚠️ Mandatory Disclaimer:</strong>
+        <span>This FIR Analyzer provides statutory information for educational understanding only, not formal legal advice. It does not create an advocate-client relationship. If facing criminal charges or police summons, immediately consult a licensed advocate.</span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeFirFooterBtn" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Citizen Login & Registration Modal -->
+  <div id="loginModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="authModalTitle">🔐 Citizen Sign In</h3>
+          <p class="modal-subtitle">Access your cases, FIR reports, and personalized legal guidance</p>
+        </div>
+        <button id="closeLoginModalBtn" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Tab toggle: Sign In vs Register -->
+      <div class="act-tabs" style="margin-bottom: 16px;">
+        <button class="act-tab active" id="tabSignInBtn" style="flex: 1;">Sign In</button>
+        <button class="act-tab" id="tabRegisterBtn" style="flex: 1;">Create Account</button>
+      </div>
+
+      <!-- Quick 1-Click Demo Login Box -->
+      <div id="demoLoginPrompt" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong style="color: #1e40af; display: block;">⚡ Demo Evaluator Login:</strong>
+          <span style="color: #3b82f6;">Username: <strong>ankit</strong> &bull; Password: <strong>legal123</strong></span>
+        </div>
+        <button type="button" id="fillDemoLoginBtn" class="btn-secondary" style="padding: 4px 10px; font-size: 11px; font-weight: 700; white-space: nowrap;">
+          Auto-Fill
+        </button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="signInForm">
+        <div class="form-group">
+          <label for="loginUsername">Username *</label>
+          <input type="text" id="loginUsername" placeholder="e.g. ankit" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password *</label>
+          <input type="password" id="loginPassword" placeholder="Enter password (demo: legal123)" required autocomplete="current-password">
+        </div>
+        <div id="loginErrorMsg" style="color: #dc2626; font-size: 12px; margin-bottom: 10px; display: none;"></div>
+        <div class="modal-footer" style="padding: 0; margin-top: 14px;">
+          <button type="submit" class="btn-primary" id="loginSubmitBtn" style="width: 100%;">Sign In</button>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" style="display: none;">
+        <div class="form-group">
+          <label for="regFullName">Full Name *</label>
+          <input type="text" id="regFullName" placeholder="e.g. Priya Sharma" required>
+        </div>
+        <div class="form-group">
+          <label for="regUsername">Choose Username *</label>
+          <input type="text" id="regUsername" placeholder="e.g. priya_legal" required>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email Address *</label>
+          <input type="email" id="regEmail" placeholder="e.g. priya@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Password *</label>
+          <input type="password" id="regPassword" placeholder="Choose a password (min 4 chars)" required>
+        </div>
+        <div id="regErrorMsg" style="color: #dc2626; font-size: 12px; margin-bottom: 10px; display: none;"></div>
+        <div class="modal-footer" style="padding: 0; margin-top: 14px;">
+          <button type="submit" class="btn-primary" id="registerSubmitBtn" style="width: 100%;">Create Account</button>
+        </div>
+      </form>
+
+      <!-- Logged-in Account Options (shown when already signed in) -->
+      <div id="loggedInView" style="display: none; text-align: center; padding: 10px 0;">
+        <div class="avatar" id="modalUserAvatar" style="width: 52px; height: 52px; font-size: 24px; margin: 0 auto 10px auto;">A</div>
+        <h4 id="modalUserName" style="margin: 0 0 4px 0;">Ankit Sharma</h4>
+        <p id="modalUserEmail" style="color: #64748b; font-size: 13px; margin: 0 0 16px 0;">ankit@example.com</p>
+        <button type="button" id="logoutBtn" class="btn-secondary" style="width: 100%; color: #dc2626; border-color: #fecaca;">
+          🚪 Log Out of Account
+        </button>
+      </div>
+
+      <!-- Legal Disclaimer -->
+      <div class="law-disclaimer-box" style="margin-top: 16px;">
+        <strong>⚠️ Information Disclaimer:</strong>
+        <span>This account stores your case references and preliminary FIR reports. It does not replace an advocate-client relationship.</span>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 10px;">
+        <button type="button" id="closeLoginModalFooterBtn" class="btn-secondary">Close</button>
       </div>
     </div>
   </div>

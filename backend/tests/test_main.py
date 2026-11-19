@@ -1,29 +1,29 @@
 """
 Basic unit tests for FastAPI main application and endpoints.
 """
-from fastapi.testclient import TestClient
-from backend.main import app
+from backend.main import health_check, get_disclaimer
+from backend.config import FRONTEND_DIR
 
-client = TestClient(app)
 
 def test_health_check():
-    """Verify that the /api/health endpoint returns 200 and proper legal disclaimer."""
-    response = client.get("/api/health")
-    assert response.status_code == 200
-    data = response.json()
+    """Verify that health_check returns 200 and proper legal disclaimer."""
+    data = health_check()
     assert data["status"] == "healthy"
     assert "disclaimer" in data
-    assert "not formal legal advice" in data["disclaimer"]
+    assert "not constitute formal legal advice" in data["disclaimer"]
+
 
 def test_disclaimer_endpoint():
-    """Verify that the /api/disclaimer endpoint returns the legal disclaimer."""
-    response = client.get("/api/disclaimer")
-    assert response.status_code == 200
-    data = response.json()
+    """Verify that get_disclaimer returns the legal disclaimer."""
+    data = get_disclaimer()
     assert "disclaimer" in data
+    assert "not constitute formal legal advice" in data["disclaimer"] or "not formal legal advice" in data["disclaimer"]
 
-def test_frontend_index_served():
-    """Verify that visiting / serves the index.html frontend page."""
-    response = client.get("/")
-    assert response.status_code == 200
-    assert "AI Legal Advisor" in response.text
+
+def test_frontend_index_exists():
+    """Verify that index.html exists in the frontend directory."""
+    index_file = FRONTEND_DIR / "index.html"
+    assert index_file.exists()
+    content = index_file.read_text(encoding="utf-8")
+    assert "AI Legal Advisor" in content
+

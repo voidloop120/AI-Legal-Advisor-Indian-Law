@@ -198,10 +198,33 @@ class LegalVectorStore:
         """
         Fallback keyword/scoring search if ChromaDB is initializing or offline.
         Ensures the web app never crashes and always returns accurate legal information.
+        Filters common English stopwords to prevent false-positive matching on non-legal queries.
         """
-        docs = load_raw_legal_docs()
-        q_tokens = set(query.lower().split())
+        import re
 
+        stopwords = {
+            "a", "about", "above", "after", "again", "against", "all", "am", "an", "and",
+            "any", "are", "as", "at", "be", "because", "been", "before", "being",
+            "below", "between", "both", "but", "by", "can", "cannot", "could", "did", "do",
+            "does", "doing", "down", "during", "each", "few", "for", "from", "further",
+            "had", "has", "have", "having", "he", "her", "here", "him", "his", "how", "i",
+            "if", "in", "into", "is", "it", "its", "me", "more", "most", "my", "no", "nor",
+            "not", "of", "off", "on", "once", "only", "or", "other", "our", "out", "over",
+            "own", "same", "she", "should", "so", "some", "such", "than", "that", "the",
+            "their", "then", "there", "these", "they", "this", "those", "through", "to",
+            "too", "under", "until", "up", "very", "was", "we", "were", "what", "when",
+            "where", "which", "while", "who", "whom", "why", "with", "would", "you", "your"
+        }
+
+        # Extract words and filter out stopwords
+        raw_words = re.findall(r"\b[a-zA-Z0-9_]+\b", query.lower())
+        meaningful_tokens = [w for w in raw_words if w not in stopwords and len(w) >= 2]
+
+        # If no meaningful keywords, return empty
+        if not meaningful_tokens:
+            return []
+
+        docs = load_raw_legal_docs()
         scored = []
         for item in docs:
             if act_filter and item.get("act_short", "").upper() != act_filter.upper():
@@ -212,8 +235,16 @@ class LegalVectorStore:
                 f"{item.get('description', '')} {' '.join(item.get('keywords', []))}"
             ).lower()
 
-            # Count token matches
-            score = sum(1 for token in q_tokens if token in text_corpus)
+            # Count token matches (give higher weight to section number or exact title match)
+            score = 0
+            for token in meaningful_tokens:
+                if token in item.get("section", "").lower():
+                    score += 5  # Strong match for section number (e.g. '303')
+                elif token in item.get("title", "").lower():
+                    score += 3  # Strong match for title (e.g. 'theft')
+                elif token in text_corpus:
+                    score += 1
+
             if score > 0:
                 scored.append((score, item))
 
@@ -233,11 +264,12 @@ class LegalVectorStore:
                 "bailable": item.get("bailable"),
                 "punishment": item.get("punishment"),
                 "description": item.get("description"),
-                "similarity": round(min(1.0, score / max(1, len(q_tokens))), 4),
+                "similarity": round(min(1.0, score / max(1, len(meaningful_tokens))), 4),
                 "full_context": format_doc_for_embedding(item)
             })
 
         return results
+
 
 
 # Global singleton instance for easy import across FastAPI routes

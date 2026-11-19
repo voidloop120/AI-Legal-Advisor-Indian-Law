@@ -13,6 +13,9 @@ from backend.config import APP_TITLE, APP_VERSION, FRONTEND_DIR, LEGAL_DISCLAIME
 from backend.database import init_db
 from backend.routes.cases import router as cases_router
 from backend.routes.laws import router as laws_router
+from backend.routes.assistant import router as assistant_router
+from backend.routes.fir import router as fir_router
+from backend.routes.auth import router as auth_router
 
 # 1. Initialize Database on startup
 init_db()
@@ -36,6 +39,12 @@ app.add_middleware(
 # 4. Register API routers
 app.include_router(cases_router)
 app.include_router(laws_router)
+app.include_router(assistant_router)
+app.include_router(fir_router)
+app.include_router(auth_router)
+
+
+
 
 
 # 5. Basic API endpoints

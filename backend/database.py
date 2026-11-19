@@ -3,9 +3,17 @@ Database module for AI Legal Advisor.
 Uses Python's standard library `sqlite3` for simple, lightweight data storage.
 """
 
+import hashlib
 import sqlite3
 from datetime import datetime
 from backend.config import DATABASE_PATH, DATA_DIR
+
+
+def hash_password(password: str) -> str:
+    """
+    Hashes a password using SHA-256 for simple, secure student authentication.
+    """
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 
 def get_db_connection() -> sqlite3.Connection:
@@ -26,12 +34,24 @@ def get_db_connection() -> sqlite3.Connection:
 def init_db():
     """
     Initializes database tables if they do not exist,
-    and seeds sample initial cases if the database is brand new.
+    and seeds sample initial cases and demo user.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 1. Table for Cases
+    # 1. Table for Registered Users / Citizens
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        full_name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+    """)
+
+    # 2. Table for Cases
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cases (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,7 +67,7 @@ def init_db():
     );
     """)
 
-    # 2. Table for Case Journey / Timeline Stages
+    # 3. Table for Case Journey / Timeline Stages
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS case_timeline (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,7 +83,23 @@ def init_db():
 
     conn.commit()
 
-    # 3. Seed sample data if table is currently empty
+    # 4. Seed demo user if users table is empty
+    cursor.execute("SELECT COUNT(*) AS count FROM users")
+    user_count = cursor.fetchone()["count"]
+    if user_count == 0:
+        cursor.execute("""
+        INSERT INTO users (username, full_name, email, password_hash, created_at)
+        VALUES (?, ?, ?, ?, ?)
+        """, (
+            "ankit",
+            "Ankit Sharma",
+            "ankit@example.com",
+            hash_password("legal123"),
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ))
+        conn.commit()
+
+    # 5. Seed sample cases if cases table is empty
     cursor.execute("SELECT COUNT(*) AS count FROM cases")
     count = cursor.fetchone()["count"]
 
@@ -71,6 +107,7 @@ def init_db():
         _seed_sample_cases(conn)
 
     conn.close()
+
 
 
 def _seed_sample_cases(conn: sqlite3.Connection):

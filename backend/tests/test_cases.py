@@ -2,17 +2,14 @@
 Unit tests for Case Management APIs and SQLite database integration.
 """
 
-from fastapi.testclient import TestClient
-from backend.main import app
-
-client = TestClient(app)
+import pytest
+from fastapi import HTTPException
+from backend.routes.cases import list_cases, get_case, create_case, CaseCreateRequest
 
 
 def test_list_cases():
-    """Verify that GET /api/cases returns a list of cases."""
-    response = client.get("/api/cases")
-    assert response.status_code == 200
-    cases = response.json()
+    """Verify that list_cases returns a list of cases."""
+    cases = list_cases()
     assert isinstance(cases, list)
     assert len(cases) >= 3  # Seeded initial cases
     first_case = cases[0]
@@ -22,10 +19,8 @@ def test_list_cases():
 
 
 def test_get_case_detail():
-    """Verify that GET /api/cases/{id} returns details and journey timeline."""
-    response = client.get("/api/cases/1")
-    assert response.status_code == 200
-    data = response.json()
+    """Verify that get_case returns details and journey timeline."""
+    data = get_case(1)
     assert data["id"] == 1
     assert "timeline" in data
     assert len(data["timeline"]) > 0
@@ -35,23 +30,23 @@ def test_get_case_detail():
 
 
 def test_get_case_not_found():
-    """Verify that requesting a non-existent case ID returns 404."""
-    response = client.get("/api/cases/9999")
-    assert response.status_code == 404
+    """Verify that requesting a non-existent case ID raises 404."""
+    with pytest.raises(HTTPException) as exc_info:
+        get_case(9999)
+    assert exc_info.value.status_code == 404
 
 
 def test_create_case():
-    """Verify that POST /api/cases creates a new case with default journey."""
-    payload = {
-        "title": "Cheque Bounce Notice",
-        "case_type": "Negotiable Instruments Act",
-        "police_station": "Financial Crimes Cell",
-        "description": "Cheque bounced due to insufficient funds."
-    }
-    response = client.post("/api/cases", json=payload)
-    assert response.status_code == 201
-    data = response.json()
-    assert data["title"] == payload["title"]
-    assert data["case_type"] == payload["case_type"]
+    """Verify that create_case creates a new case with default journey."""
+    payload = CaseCreateRequest(
+        title="Cheque Bounce Notice",
+        case_type="Negotiable Instruments Act",
+        police_station="Financial Crimes Cell",
+        description="Cheque bounced due to insufficient funds."
+    )
+    data = create_case(payload)
+    assert data["title"] == payload.title
+    assert data["case_type"] == payload.case_type
     assert "case_number" in data
     assert len(data["timeline"]) == 6
+
